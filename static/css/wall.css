@@ -1,0 +1,139 @@
+*{
+	padding: 0;
+	margin: 0;
+}
+
+html{
+	/*overflow-y: hidden;*/
+	font-family: arial, sans-serif;
+}
+
+/*.img-container{
+	
+	width:100%;
+    height:8em;
+    text-align:center;
+    overflow:hidden;
+}
+.img-container img{
+	width: 100%;
+	vertical-align: middle;
+	opacity: 0;
+	position: absolute;
+}*/
+
+#panel{
+	background-color: #009999;
+	color: white;
+	padding: 1em;
+}
+#panel p, #panel form{
+	display: inline-block;
+}
+
+
+main{
+	outline: 0px red solid;
+	padding: 1em;
+	background-color: rgb(250,250,250);
+	text-align: center;
+}
+#new-message{
+	text-align: center;
+
+}
+#new-message *{
+	vertical-align: middle;
+}
+#new-message textarea{
+	width: 60%;
+	height: 3em;
+	margin: 1em auto;
+	padding: .5em;
+
+}
+section{
+	width: 80vw;
+	padding: 1em;
+	background-color: #e6eeff;
+	/*overflow-y: scroll;*/
+	outline: 2px #006666 solid;
+	margin: 0 auto;
+	text-align: left;
+}
+
+.message{
+	margin: 0.5em auto;
+	margin-bottom: 1.5em;
+	width: 85%;	
+	outline: 0px red solid;
+	text-align: center;
+}
+
+.message *{
+	vertical-align: top;
+}
+.message h4{
+	font-size: .9em;
+	text-align: left;
+	margin-left: calc(7.5% - 1.5em + 1em);
+	margin-bottom: .25em;
+}
+.message p{
+	display: inline-block;
+	text-align: left;
+	font-size: .9em;
+	background-color: rgb(245,245,245);
+	border: 1px solid black;
+	border-radius: 5px;
+	padding: 1em;
+	max-height: 12em;
+	width: calc(85% - 3em);
+	overflow-y: auto;
+}
+
+input[type="submit"]{
+	padding: .25em 1em;
+}
+
+.controls *{
+	color: black;
+	height: 1em;
+}
+.controls{
+	display: inline-block;
+	width: 1em;
+
+}
+.controls a{
+	display: block;
+}
+
+
+textarea.edit{
+	width: 98%;
+	background-color: transparent;
+}
+
+/* better scrolling thanks to SO 
+https://stackoverflow.com/questions/21684101/css-vertical-scrollbar-padding-left-right-in-ul-possible*/
+::-webkit-scrollbar {
+    width: 14px;
+    height: 18px;
+}
+::-webkit-scrollbar-thumb {
+    height: 6px;
+    border: 4px solid rgba(0, 0, 0, 0);
+    background-clip: padding-box;
+    -webkit-border-radius: 7px;
+    background-color: rgba(0, 0, 0, 0.15);
+    -webkit-box-shadow: inset -1px -1px 0px rgba(0, 0, 0, 0.05), inset 1px 1px 0px rgba(0, 0, 0, 0.05);
+}
+::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+    display: none;
+}
+::-webkit-scrollbar-corner {
+    background-color: transparent;
+}

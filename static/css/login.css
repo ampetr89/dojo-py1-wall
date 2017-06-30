@@ -1,0 +1,48 @@
+
+body{
+	text-align: center;
+	font-family: arial, sans-serif;
+}
+
+label, input{
+	width: 100%;
+	display: block;
+}
+
+label{
+	margin-bottom: .5em;
+}
+input{
+	margin-bottom: 1em;
+	text-align: center;
+}
+input[type='submit']{
+	width: 100%;
+	margin: 3em 0;
+}
+
+.userform{
+	width: 25vw;
+	outline: 1px gray solid;
+	margin: 0 auto;
+	padding: 2em;
+}
+
+
+.userform p{
+	font-size: 80%;
+}
+
+
+.errors, .success{
+	margin-top: .5em;
+}
+.errors li{
+	color: crimson;
+}
+.success li{
+	color: green;
+}
+.errors ul, .success ul{
+	list-style: none;
+}
