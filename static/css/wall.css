@@ -5,7 +5,7 @@
 
 html{
 	/*overflow-y: hidden;*/
-	font-family: arial, sans-serif;
+	font-family: Alef, arial, sans-serif;
 }
 
 /*.img-container{
@@ -22,13 +22,18 @@ html{
 	position: absolute;
 }*/
 
-#panel{
+#topbar{
 	background-color: #009999;
 	color: white;
 	padding: 1em;
 }
-#panel p, #panel form{
+#topbar p, #topbar form{
 	display: inline-block;
+	width: calc(50vw - 2em);
+	vertical-align: middle;
+}
+#topbar form{
+	text-align: right;
 }
 
 
@@ -38,23 +43,47 @@ main{
 	background-color: rgb(250,250,250);
 	text-align: center;
 }
-#new-message{
-	text-align: center;
 
+.new-message{
+	text-align: center;
 }
-#new-message *{
+.new-message *{
 	vertical-align: middle;
 }
-#new-message textarea{
+.new-message textarea{
 	width: 60%;
 	height: 3em;
 	margin: 1em auto;
 	padding: .5em;
+}
+.new-message button{
+/* input[type="submit"]{*/
+	padding: 1em 2em;
+	border-radius: 10px;
+	background-color: rgb(240,240,240);
+	border-color: #339966;
+	color: #339966;
+	font-weight: bold;
+	margin: .5em auto;
+}
+/*#new-button-container{
+	text-align: right;
+}
+#new-button{
+	padding: 1em 2em;
+	background-color: rgb(200,200,200);
+	border-color: blue;
+	border-radius: 10px;
+	color: blue;
+	font-weight: bold;
+}*/
 
+section, aside{
+	padding: 1em;
+	display: inline-block;
 }
 section{
-	width: 80vw;
-	padding: 1em;
+	width: 65vw;
 	background-color: #e6eeff;
 	/*overflow-y: scroll;*/
 	outline: 2px #006666 solid;
@@ -62,10 +91,26 @@ section{
 	text-align: left;
 }
 
+aside{
+	vertical-align: top;
+	height: 100%;
+	background-color: silver;
+	outline: 1px black solid;
+	width: 15vw;
+	margin: 0 1em;
+}
+
+.wrapper{
+	width: 75%;
+	margin: 0 auto;
+	outline: 0px orange solid;
+}
 .message{
-	margin: 0.5em auto;
-	margin-bottom: 1.5em;
-	width: 85%;	
+	margin: 0 auto;
+	/*margin-bottom: 1.5em;*/
+	margin-top: 1.5em;
+	/*width: 85%;	*/
+	width: 100%;
 	outline: 0px red solid;
 	text-align: center;
 }
@@ -73,14 +118,16 @@ section{
 .message *{
 	vertical-align: top;
 }
-.message h4{
+.message h4, .comment h4{
 	font-size: .9em;
 	text-align: left;
-	margin-left: calc(7.5% - 1.5em + 1em);
+	/*margin-left: calc(7.5% - 1.5em + 1em);*/
 	margin-bottom: .25em;
+
 }
-.message p{
-	display: inline-block;
+/*.message p{*/
+.msg-text{
+	
 	text-align: left;
 	font-size: .9em;
 	background-color: rgb(245,245,245);
@@ -88,9 +135,13 @@ section{
 	border-radius: 5px;
 	padding: 1em;
 	max-height: 12em;
-	width: calc(85% - 3em);
+	
 	overflow-y: auto;
 }
+.msg-text p{
+	display: inline-block;
+	width: calc(100% - 2em); /* need to subtract off padding and control box width*/
+	}
 
 input[type="submit"]{
 	padding: .25em 1em;
@@ -99,22 +150,88 @@ input[type="submit"]{
 .controls *{
 	color: black;
 	height: 1em;
+
+}
+.fa{
+	opacity: 0;
 }
 .controls{
 	display: inline-block;
 	width: 1em;
-
+	height: 2em;
 }
 .controls a{
 	display: block;
 }
 
+.msg-text a{
+	display: block;
+	font-size: 80%;
+}
 
+.comments{
+	outline: 0px blue solid;
+	display: none;
+	width: 100%;
+	/*text-align: right;*/
+	/*width: calc(85%);*/
+}
+
+
+.comment, .comments textarea{
+	width: calc(100% - 1em - 2em - 2em );
+	margin: 0;
+	padding: .5em;
+	display: block;
+}
+.comment-text{
+	margin-bottom: .5em;
+}
+.comments textarea{
+	/* new comment entry */
+margin-left: calc(2em - 1px);
+}
+
+.comments button{/*input[type="submit"]*/
+	margin: 0;
+	width: 5em;
+	margin-left: calc(100% - 5em - 2em);
+}
+.comment{
+	margin-left: 2em;
+	/* the box width minus padding,  minus control width, minus indent*/
+	background-color: rgb(240, 240, 240);
+	font-size: 80%;
+	outline: 1px gray solid;
+	
+	text-align: left;
+	
+	/*margin-left: calc(20% - 1em - 2em); *//* the box width minus padding,  minus control width*/
+	
+}
+.comment *{
+	vertical-align: top;
+}
+.comment p{
+	border: none;
+	display: inline-block;
+	width: calc(100% - 2em); /* need to subtract off padding and control box width*/
+}
 textarea.edit{
 	width: 98%;
 	background-color: transparent;
 }
 
+/*#editbox{
+	position: fixed;
+	top: 50vh;
+	left: 50vw;
+	z-index: 999;
+	width: 200px;
+	height: 200px;
+	background-color: orange;
+}
+*/
 /* better scrolling thanks to SO 
 https://stackoverflow.com/questions/21684101/css-vertical-scrollbar-padding-left-right-in-ul-possible*/
 ::-webkit-scrollbar {

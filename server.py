@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, redirect, session, flash, jsonify
 from mysqlconnection import MySQLConnection
 from flask_bcrypt import Bcrypt
+from datetime import datetime as dt # https://docs.python.org/2/library/time.html#time.strftime
 import re
 
 
@@ -10,6 +11,9 @@ app.secret_key = open('secret_key.txt', 'r').read().strip()
 
 db = MySQLConnection(app, 'wall')
 bcrypt = Bcrypt(app)
+
+TS_FMT = '%B %d, %Y at %I:%M %p'
+EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9\.\+_-]+@[a-zA-Z0-9\._-]+\.[a-zA-Z]*$')
 
 
 @app.route('/')
@@ -24,14 +28,39 @@ def home():
 
 @app.route('/wall')
 def wall():
-	message_query = "select a.id, user_id, a.created_at, content, \
+	message_query = "select a.id, user_id, \
+	a.created_at, \
+	content, \
 	 concat(first_name,' ',last_name) as user_name \
 	from messages as a \
 	join users as b\
 	 on a.user_id = b.id\
 	order by a.created_at desc"
 
+	
 	messages = db.query_db(message_query)
+	for message in messages:
+		ts = message['created_at']
+		message['created_at'] = ts.strftime(TS_FMT)
+
+	comment_query = "select a.id, message_id, user_id, \
+		 a.created_at, \
+		 content, \
+		 concat(first_name,' ',last_name) as user_name  \
+		 from comments as a \
+		 join users as b \
+		 on a.user_id = b.id \
+		 order by a.created_at asc"
+
+	comments = db.query_db(comment_query)
+	for comment in comments:
+		ts = comment['created_at']
+		comment['created_at'] = ts.strftime(TS_FMT)
+		
+
+	for message in messages:
+		mcomm = [comm for comm in comments if comm['message_id'] == message['id']]
+		message.update({'comments': mcomm, 'ncomments':len(mcomm)})
 
 	return render_template('wall.html', 
 	 first_name=session['first_name'],
@@ -75,7 +104,6 @@ def process_login():
 def register():
 	return render_template('register.html')
 
-EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9\.\+_-]+@[a-zA-Z0-9\._-]+\.[a-zA-Z]*$')
 
 @app.route('/process-registration', methods=['POST'])
 def process_registration():
@@ -133,66 +161,128 @@ def logout():
 	session['login'] = False
 	return redirect('/')
 
-@app.route('/add-message', methods=['POST'])
-def add_message():
-	query = 'insert into messages(user_id, content) \
-	values(:user_id, :content)'
+@app.route('/add/<texttype>', methods=['POST'])
+def add_message(texttype):
+	# texttype will be 'message' or 'comments'
 	
 	data =  {
 		'user_id': session['user_id'],
 		'content': request.form.get('content') 
 	}
-	try:
-		result = db.query_db(query, data)	
-	except Exception as err:
-		flash('Message not added, with error: ' + str(err))
-	return redirect('/')
+	if texttype=='message':
+		tbl = 'messages'
+		query = 'insert into messages(user_id, content) \
+	values(:user_id, :content)'
 
-@app.route('/update-message', methods=['POST'])
-def update_message():
-	# print (request.form)
-	query = 'update messages set content=:content \
-	where id=:id';
+	elif texttype == 'comment':
+		tbl = 'comments'
+		query = 'insert into comments(user_id, message_id, content) \
+	values(:user_id, :mid, :content)'
+		data.update({'mid': request.form.get('mid')})
+		
+	
+	try:
+		newid = db.query_db(query, data)
+	except Exception as err:
+		return(texttype+' not added, with error: ' + str(err))
+
+	getcols = "CONCAT(first_name,' ', last_name) as user_name, a.created_at, a.id"
+	if texttype=='comment':
+		getcols += ', message_id'
+	result_query = 'select {} \
+		from {} as a\
+		join users as b \
+		 on a.user_id = b.id\
+		where a.id=:id'.format(getcols, tbl)
+	result_record = db.query_db(result_query, {'id': newid})[0]
+	ts = result_record['created_at']
+	result_record['created_at'] = ts.strftime(TS_FMT)
+	return jsonify(result_record) 
+		
+
+@app.route('/update/<texttype>', methods=['POST'])
+def update(texttype):
+	# tpe = request.form.get('type');
+	if texttype=='message':
+		tbl = 'messages'
+	elif texttype=='comment':
+		tbl = 'comments'
+	query = 'update {} set content=:content \
+	where id=:id'.format(tbl);
 	params = {
 		'content': request.form.get('content'),
 		'id': request.form.get('id')
 	}
 	try:
 		db.query_db(query, params)
-		return '0'
+		return str(result)
 	except Exception as err:
-		return 'Error updating message, with error: '+str(err)
+		return 'Error updating {}, with error: {}'.format(tbl, str(err))
 
 
-@app.route('/delete-message', methods=['POST'])
-def delete_message():
-	
-	query = 'delete from messages \
-	where id=:id';
+@app.route('/delete/<texttype>', methods=['POST'])
+def delete_message(texttype):
+	if texttype=='message':
+		# if deleting a message, be sure to delete its children first, otherwise PK error
+		queries = ['delete from comments where message_id = :mid',
+		'delete from messages where id=:id']
+	elif texttype=='comment':
+		queries = ['delete from comments where id=:id']
+
 	params = {
-		'id': request.form.get('id')
+		'id': request.form.get('id'),
+		'mid': request.form.get('mid')
 	}
 	try:
-		db.query_db(query, params)
+		for query in queries:
+			print(query)
+			result = db.query_db(query, params)
 		return '0'
 	except Exception as err:
-		return 'Error updating message, with error: '+str(err)
+		print( 'Error updating message, with error: '+str(err))
 
 
 
-"""
 @app.route('/get-content')
 def get_content():
-	message_query = "select a.id as message_id, user_id, a.created_at, content, \
-	 concat(first_name,' ',last_name) as user_name \
-	from messages as a \
-	join users as b\
-	 on a.user_id = b.id\
-	order by a.created_at desc"
+	message_query = "select a.id, user_id, \
+		case when a.user_id = :this_user then 1 else 0 end as canedit,\
+		a.created_at, \
+		content, \
+		 concat(first_name,' ',last_name) as user_name \
+		from messages as a \
+		join users as b\
+		 on a.user_id = b.id\
+		order by a.created_at asc"
 
-	messages = db.query_db(message_query)
+	data = {'this_user': session['user_id']}
+	messages = db.query_db(message_query, data)
+	for message in messages:
+		ts = message['created_at']
+		message['created_at'] = ts.strftime(TS_FMT)
+
+	comment_query = "select a.id, message_id, user_id, \
+		case when a.user_id = :this_user then 1 else 0 end as canedit,\
+		 a.created_at, \
+		 content, \
+		 concat(first_name,' ',last_name) as user_name  \
+		 from comments as a \
+		 join users as b \
+		 on a.user_id = b.id \
+		 order by a.created_at asc"
+
+	comments = db.query_db(comment_query, data)
+	for comment in comments:
+		ts = comment['created_at']
+		comment['created_at'] = ts.strftime(TS_FMT)
+		
+
+	for message in messages:
+		mcomm = [comm for comm in comments if comm['message_id'] == message['id']]
+		message.update({'comments': mcomm, 'ncomments':len(mcomm)})
+		# print(mcomm)
 
 	return jsonify(messages)
-"""
+
 
 app.run(debug=True)
