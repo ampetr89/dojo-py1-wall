@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Home</title>
+	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/wall.css')}}">
+	<link href='https://fonts.googleapis.com/css?family=Alef' rel='stylesheet'>
+	<script src="https://use.fontawesome.com/e5e7825618.js"></script>
+	<script type="text/javascript" 
+			src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js">
+	</script> 
+	<script type="text/javascript">
+		
+		var msgSort = 'latestFirst';
+		var commentSort = 'earliestFirst';
+		var saveIcon = 'fa-floppy-o';
+		var deleteIcon = 'fa-trash';
+		var editIcon = 'fa-pencil';
+		var cancelIcon = 'fa-times';
+
+	</script>
+	<script type="text/javascript" src="{{url_for('static', filename='js/constructors.js')}}"></script>
+
+	<script type="text/javascript" src="{{url_for('static', filename='js/handlers.js')}}"></script>
+
+	<script type="text/javascript">
+		$(document).ready(function(){
+			
+
+			function getContent(){
+				$.get('/get-content',
+					function(res){
+						messages = res;
+						if (msgSort == 'earliestFirst'){
+							msgAdd = function(selector, html){
+								selector.append(html)};
+						}else if(msgSort == 'latestFirst'){
+							msgAdd = function(selector, html){
+								selector.prepend(html)};
+						}
+						if (commentSort == 'earliestFirst'){
+							commentAdd = function(selector, html){
+								selector.append(html)};
+						}else if(commentSort == 'latestFirst'){
+							commentAdd = function(selector, html){
+								selector.prepend(html)};
+						}
+						for(i in messages){
+							var message = messages[i];
+							var comments = message.comments;
+							var ncomments = comments.length;
+							mid = message.id;
+							
+							msgAdd($('#messages'), messageHtml(mid));
+							populateMessage(mid, message.user_name, message.created_at, message.content, message.ncomments, message.canedit);
+							
+							$comments= $('.comments[mid='+mid+']');
+							//console.log('comments now', comments);
+							for(j=0; j<ncomments; j++){
+								comment = comments[j];
+								
+								cid = comment['id'];
+								commentAdd($comments, commentHtml(cid));
+								populateComment(cid=cid, 
+									user_name=comment.user_name, 
+									created_at=comment.created_at,
+									content=comment.content,
+									canedit=comment.canedit);
+							}
+							$('.comments[mid='+mid+']').append(newCommentHtml(mid));
+						}
+
+						resizeAds();
+					})
+			}
+			getContent();
+			resizeAds();
+
+			
+		})
+	</script>
+	
+</head>
+<body>
+
+<header>
+<!--<div class='img-container'>
+	<img src="{{url_for('static', filename='img/background.jpg')}}">
+</div>-->
+<div id="topbar">
+	<p>Welcome {{first_name}}!</p>
+
+	<form action='/logout'>
+		<input type="submit" value="Logout">
+	</form>
+</div>
+
+</header>
+
+<main>
+	<h1>Student Forum</h1>
+	<div class='wrapper'>
+		<div class="new-message">
+				<textarea placeholder='Post a message here' name='content'></textarea>
+				<button class='new'>Submit</button>
+			
+		</div>
+	</div>
+
+	<section>
+		<div class='wrapper' id="messages">
+			
+		</div>
+	</section>
+	<aside id="ads">
+			Ads / Images
+	</aside>
+	
+</main>
+
+</body>
+</html>
