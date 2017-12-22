@@ -1,4 +1,4 @@
 secret_key.txt
 __pycache__*
-temp*
+temp/*
 *.mwb.bak
