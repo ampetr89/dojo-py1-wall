@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Login</title>
+	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/login.css')}}">
+</head>
+<body>
+{% with messages = get_flashed_messages(category_filter=["login-error"]) %}
+	{% if messages %}
+	<div class="errors">
+		<ul>
+	      {% for message in messages %}
+	        <li>{{message}}</li>
+	      {% endfor %}
+	     </ul>
+	</div>
+	{% endif %}
+{% endwith %}
+
+{% with messages = get_flashed_messages(category_filter=["registration-success"]) %}
+	{% if messages %}
+	<div class="success">
+		<ul>
+	      {% for message in messages %}
+	        <li>{{message}}</li>
+	      {% endfor %}
+	     </ul>
+	</div>
+	{% endif %}
+{% endwith %}
+
+
+<section class='userform'>
+	<form action='/process-login' method='POST'>
+	<label for='email'>Email:</label>
+	<input type='text' name='email'>
+
+	<label for='password'>Password:</label>
+	<input type='password' name='password'>
+
+	<input type="submit" value="Login">
+	</form>
+
+	<p>Don't have an account? <a href='/register'>Register here</a>.</p>
+</section>
+
+</body>
+</html>
